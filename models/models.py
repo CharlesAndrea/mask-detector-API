@@ -6,7 +6,7 @@ db = SQLAlchemy()
 # Declaración de clases 
 class Empleado(db.Model):
     __tablename__ = 'empleado'
-    ci = db.Column(db.Integer, primary_key=True)
+    ci = db.Column(db.Integer, primary_key=True, unique=True)
     nombre_completo = db.Column(db.String, nullable=False)
     correo = db.Column(db.String, nullable=False)
     contrasena = db.Column(db.String, nullable=False)
@@ -17,8 +17,10 @@ class Empleado(db.Model):
     estado = db.Column(db.Boolean, nullable=False)
     dept_id = db.Column(db.Integer, db.ForeignKey('departamento.id'), nullable=False)
     rol_id = db.Column(db.Integer, db.ForeignKey('rol.id'), nullable=False)
-    ci_s = db.Column(db.Integer, db.ForeignKey('empleado.id'))
+    ci_s = db.Column(db.Integer, db.ForeignKey('empleado.ci'))
     parent = db.relationship('Empleado', remote_side=[ci])
+    historiales = db.relationship('Historial', backref='empleado', lazy=True)
+
 
     @property
     def serialize(self):
@@ -33,7 +35,8 @@ class Empleado(db.Model):
             'sexo': self.sexo,
             'estado': self.estado,
             'dept_id': self.dept_id,
-            'rol_id': self.rol_id
+            'rol_id': self.rol_id,
+            'historiales': self.historiales
         }
 
 class Departamento(db.Model):
@@ -63,8 +66,8 @@ class Rol(db.Model):
 
 class Historial(db.Model):
     __tablename__= 'historial'
-    id = db.Column(db.Integer, primary_key=True)
-    ci_e = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    ci_e = db.Column(db.Integer, db.ForeignKey('empleado.ci'), primary_key=True)
     modo_uso = db.Column(db.String)
     fecha = db.Column(db.DateTime)
     @property
