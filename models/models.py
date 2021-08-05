@@ -1,30 +1,32 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import backref
+#from sqlalchemy.orm import backref
 
-db = SQLAlchemy
+db = SQLAlchemy()
 
-# Definición de clases, cada clase corresponde a un modelo
-
+# Declaración de clases 
 class Empleado(db.Model):
     __tablename__ = 'empleado'
     ci = db.Column(db.Integer, primary_key=True)
-    nombre_completo = db.Column(db.String)
-    correo = db.Column(db.String)
+    nombre_completo = db.Column(db.String, nullable=False)
+    correo = db.Column(db.String, nullable=False)
+    contrasena = db.Column(db.String, nullable=False)
     tlf = db.Column(db.String)
     direccion = db.Column(db.String(120))
     fecha_nacimiento = db.Column(db.String)
     sexo = db.Column(db.String)
-    estado = db.Column(db.Boolean)
+    estado = db.Column(db.Boolean, nullable=False)
     dept_id = db.Column(db.Integer, db.ForeignKey('departamento.id'), nullable=False)
     rol_id = db.Column(db.Integer, db.ForeignKey('rol.id'), nullable=False)
-    ci_s = Column(Integer, ForeignKey('empleado.id'))
-    parent = relationship('Empleado', remote_side=[ci])
+    ci_s = db.Column(db.Integer, db.ForeignKey('empleado.id'))
+    parent = db.relationship('Empleado', remote_side=[ci])
+
     @property
     def serialize(self):
         return {
             'ci': self.ci,
             'nombre_completo': self.nombre_completo,
             'correo': self.correo,
+            'contrasena': self.contrasena,
             'tlf': self.correo,
             'direccion': self.direccion,
             'fecha_nacimiento': self.fecha_nacimiento,
@@ -61,13 +63,15 @@ class Rol(db.Model):
 
 class Historial(db.Model):
     __tablename__= 'historial'
-    id = db.Column(db.Integer)
+    id = db.Column(db.Integer, primary_key=True)
+    ci_e = db.Column(db.Integer, primary_key=True)
     modo_uso = db.Column(db.String)
     fecha = db.Column(db.DateTime)
     @property
     def serialize(self):
         return {
             'id': self.id,
+            'ci_e': self.ci_e,
             'modo_uso': self.modo_uso,
             'fecha': self.fecha
         }

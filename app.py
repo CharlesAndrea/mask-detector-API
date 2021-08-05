@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Resource, Api
 from flask_migrate import Migrate
-from models.models import db
+from Models.models import db
 
 app = Flask(__name__)
 api = Api(app)
