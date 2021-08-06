@@ -15,10 +15,14 @@ class Empleado(db.Model):
     fecha_nacimiento = db.Column(db.String)
     sexo = db.Column(db.String)
     estado = db.Column(db.Boolean, nullable=False)
+
+    # Columnas correspondientes a relaciones
     dept_id = db.Column(db.Integer, db.ForeignKey('departamento.id'), nullable=False)
     rol_id = db.Column(db.Integer, db.ForeignKey('rol.id'), nullable=False)
-    ci_s = db.Column(db.Integer, db.ForeignKey('empleado.ci'))
+    # Relación recursiva Supervisor - Empleado
+    ci_s = db.Column(db.Integer, db.ForeignKey('empleado.ci')) # Puede ser nulo, en el caso que el empleado sea un supervisor
     parent = db.relationship('Empleado', remote_side=[ci])
+    # Relación Empleado - Historial
     historiales = db.relationship('Historial', backref='empleado', lazy=True)
 
 
@@ -78,9 +82,3 @@ class Historial(db.Model):
             'modo_uso': self.modo_uso,
             'fecha': self.fecha
         }
-
-
-historial_generado = db.Table('historial_generado',
-    db.Column('ci_e', db.Integer, db.ForeignKey('empleado.ci'), primary_key=True),
-    db.Column('id_hist', db.Integer, db.ForeignKey('historial.id'), primary_key=True)
-)
