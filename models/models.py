@@ -1,9 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
-#from sqlalchemy.orm import backref
 
 db = SQLAlchemy()
 
 # Declaración de clases 
+
 class Empleado(db.Model):
     __tablename__ = 'empleado'
     ci = db.Column(db.Integer, primary_key=True, unique=True)
@@ -17,12 +17,15 @@ class Empleado(db.Model):
     estado = db.Column(db.Boolean, nullable=False)
 
     # Columnas correspondientes a relaciones
+
+    # Relación Empleado - Departamento (m-1)
     dept_id = db.Column(db.Integer, db.ForeignKey('departamento.id'), nullable=False)
+    # Relación Empleado - Rol (m-1)
     rol_id = db.Column(db.Integer, db.ForeignKey('rol.id'), nullable=False)
-    # Relación recursiva Supervisor - Empleado
+    # Relación recursiva Supervisor - Trabajador (1-m)
     ci_s = db.Column(db.Integer, db.ForeignKey('empleado.ci')) # Puede ser nulo, en el caso que el empleado sea un supervisor
     parent = db.relationship('Empleado', remote_side=[ci])
-    # Relación Empleado - Historial
+    # Relación Empleado - Historial (1-m)
     historiales = db.relationship('Historial', backref='empleado', lazy=True)
 
 
@@ -39,15 +42,16 @@ class Empleado(db.Model):
             'sexo': self.sexo,
             'estado': self.estado,
             'dept_id': self.dept_id,
-            'rol_id': self.rol_id,
-            'historiales': self.historiales
+            'rol_id': self.rol_id
         }
 
 class Departamento(db.Model):
     __tablename__ = 'departamento'
     id = db.Column(db.Integer, primary_key=True)
     nombre_dept = db.Column(db.String)
+    # Relación Empleado - Departamento (m-1)
     empleados = db.relationship('Empleado', backref='departamento', lazy=True)
+    
     @property
     def serialize(self):
         return {
@@ -59,21 +63,24 @@ class Rol(db.Model):
     __tablename__ = 'rol'
     id = db.Column(db.Integer, primary_key=True)
     nombre_rol = db.Column(db.String)
+    # Relación Empleados - Rol (m-1)
     empleados = db.relationship('Empleado', backref='rol', lazy=True)
+   
     @property
     def serialize(self):
         return {
             'id': self.id,
-            'nombre_rol': self.nombre_rol,
-            'empleados': self.empleados
+            'nombre_rol': self.nombre_rol
         }
 
 class Historial(db.Model):
     __tablename__= 'historial'
     id = db.Column(db.Integer, primary_key=True, unique=True)
+    # Relación Empleado - Historial (1-m)
     ci_e = db.Column(db.Integer, db.ForeignKey('empleado.ci'), primary_key=True)
     modo_uso = db.Column(db.String)
     fecha = db.Column(db.DateTime)
+   
     @property
     def serialize(self):
         return {
