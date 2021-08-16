@@ -1,1 +1,1 @@
-from Models.models import Historial 
+from models.models import Historial 

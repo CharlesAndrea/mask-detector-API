@@ -1,1 +1,1 @@
-from Models.models import Departamento
+from models.models import Departamento

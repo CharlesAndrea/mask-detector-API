@@ -14,7 +14,7 @@ class Empleado(db.Model):
     direccion = db.Column(db.String(120))
     fecha_nacimiento = db.Column(db.String)
     sexo = db.Column(db.String)
-    estado = db.Column(db.Boolean, nullable=False)
+    estado = db.Column(db.SmallInteger, nullable=False)
 
     # Columnas correspondientes a relaciones
 
@@ -28,6 +28,19 @@ class Empleado(db.Model):
     # Relación Empleado - Historial (1-m)
     historiales = db.relationship('Historial', backref='empleado', lazy=True)
 
+    def __init__(self, ci, nombre_completo, correo, contrasena, tlf, direccion, fecha_nacimiento, sexo, estado, dept_id, rol_id, ci_s):
+        self.ci = ci,
+        self.nombre_completo = nombre_completo,
+        self.correo = correo,
+        self.contrasena = contrasena,
+        self.tlf = tlf, 
+        self.direccion = direccion, 
+        self.fecha_nacimiento = fecha_nacimiento,
+        self.sexo = sexo,
+        self.estado = estado, 
+        self.dept_id = dept_id,
+        self.rol_id = rol_id,
+        self.ci_s = ci_s
 
     @property
     def serialize(self):
@@ -42,8 +55,11 @@ class Empleado(db.Model):
             'sexo': self.sexo,
             'estado': self.estado,
             'dept_id': self.dept_id,
-            'rol_id': self.rol_id
+            'rol_id': self.rol_id,
+            'ci_s': self.ci_s
         }
+
+        
 
 class Departamento(db.Model):
     __tablename__ = 'departamento'
