@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from models.models import db
 
 from routes.empleado_routes import empleado_bp
+from routes.historial_routes import historial_bp
 
 app = Flask(__name__)
 api = Api(app)
@@ -14,6 +15,7 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 app.register_blueprint(empleado_bp, url_prefix='/empleados')
+app.register_blueprint(historial_bp, url_prefix='/historiales')
 
 
 
