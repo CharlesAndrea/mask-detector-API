@@ -1,6 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
+from marshmallow import fields
+from marshmallow_sqlalchemy.schema import auto_field
 
 db = SQLAlchemy()
+marsh = Marshmallow()
 
 # Declaración de clases 
 
@@ -42,22 +46,38 @@ class Empleado(db.Model):
         self.rol_id = rol_id,
         self.ci_s = ci_s
 
-    @property
-    def serialize(self):
-        return {
-            'ci': self.ci,
-            'nombre_completo': self.nombre_completo,
-            'correo': self.correo,
-            'contrasena': self.contrasena,
-            'tlf': self.correo,
-            'direccion': self.direccion,
-            'fecha_nacimiento': self.fecha_nacimiento,
-            'sexo': self.sexo,
-            'estado': self.estado,
-            'dept_id': self.dept_id,
-            'rol_id': self.rol_id,
-            'ci_s': self.ci_s
-        }
+    #@property
+    #def serialize(self):
+        #return {
+            #'ci': self.ci,
+            #'nombre_completo': self.nombre_completo,
+            #'correo': self.correo,
+            #'contrasena': self.contrasena,
+            #'tlf': self.correo,
+            #'direccion': self.direccion,
+            #'fecha_nacimiento': self.fecha_nacimiento,
+            #'sexo': self.sexo,
+            #'estado': self.estado,
+            #'dept_id': self.dept_id,
+            #'rol_id': self.rol_id,
+            #'ci_s': self.ci_s
+        #}
+
+class EmpleadoEsquema(marsh.Schema):
+    class Meta:
+        fields = ('ci', 
+        'nombre_completo', 
+        'correo', 
+        'contrasena', 
+        'tlf', 
+        'direccion', 
+        'fecha_nacimiento',
+        'sexo',
+        'estado',
+        'dept_id',
+        'rol_id',
+        'ci_s')
+
 
         
 
@@ -67,13 +87,24 @@ class Departamento(db.Model):
     nombre_dept = db.Column(db.String)
     # Relación Empleado - Departamento (m-1)
     empleados = db.relationship('Empleado', backref='departamento', lazy=True)
+
+    def __init__(self, id, nombre_dept):
+        self.id = id,
+        self.nombre_dept = nombre_dept
     
-    @property
-    def serialize(self):
-        return {
-            'id': self.id,
-            'nombre_dept': self.nombre_dept
-        }
+    #@property
+    #def serialize(self):
+        #return {
+            #'id': self.id,
+            #'nombre_dept': self.nombre_dept
+        #}
+
+class DepartamentoSchema(marsh.SQLAlchemySchema):
+    class Meta:
+        fields = ('id', 'nombre_dept')
+        #model = Departamento
+        #id = marsh.auto_field,
+        #nombre_dept = marsh.auto_field
 
 class Rol(db.Model):
     __tablename__ = 'rol'
