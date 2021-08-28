@@ -1,39 +1,40 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-from marshmallow import fields
-from marshmallow_sqlalchemy.schema import auto_field
+
 
 db = SQLAlchemy()
 marsh = Marshmallow()
 
 # Declaración de clases 
 
+# Empleados
 class Empleado(db.Model):
     __tablename__ = 'empleado'
     ci = db.Column(db.Integer, primary_key=True, unique=True)
+    public_id = db.Column(db.String(50), unique = True)
     nombre_completo = db.Column(db.String, nullable=False)
     correo = db.Column(db.String, nullable=False)
-    contrasena = db.Column(db.String, nullable=False)
+    contrasena = db.Column(db.String(200), nullable=False)
     tlf = db.Column(db.String)
     direccion = db.Column(db.String(120))
     fecha_nacimiento = db.Column(db.String)
     sexo = db.Column(db.String)
-    estado = db.Column(db.SmallInteger, nullable=False)
+    estado = db.Column(db.SmallInteger, nullable=False, default=1)
 
     # Columnas correspondientes a relaciones
-
     # Relación Empleado - Departamento (m-1)
     dept_id = db.Column(db.Integer, db.ForeignKey('departamento.id'), nullable=False)
     # Relación Empleado - Rol (m-1)
-    rol_id = db.Column(db.Integer, db.ForeignKey('rol.id'), nullable=False)
+    rol_id = db.Column(db.Integer, db.ForeignKey('rol.id'), nullable=False, default=2)
     # Relación recursiva Supervisor - Trabajador (1-m)
     ci_s = db.Column(db.Integer, db.ForeignKey('empleado.ci')) # Puede ser nulo, en el caso que el empleado sea un supervisor
     parent = db.relationship('Empleado', remote_side=[ci])
     # Relación Empleado - Historial (1-m)
     historiales = db.relationship('Historial', backref='empleado', lazy=True)
 
-    def __init__(self, ci, nombre_completo, correo, contrasena, tlf, direccion, fecha_nacimiento, sexo, estado, dept_id, rol_id, ci_s):
+    def __init__(self, ci, public_id, nombre_completo, correo, contrasena, tlf, direccion, fecha_nacimiento, sexo, estado, dept_id, rol_id, ci_s):
         self.ci = ci,
+        self.public_id = public_id,
         self.nombre_completo = nombre_completo,
         self.correo = correo,
         self.contrasena = contrasena,
@@ -46,26 +47,11 @@ class Empleado(db.Model):
         self.rol_id = rol_id,
         self.ci_s = ci_s
 
-    #@property
-    #def serialize(self):
-        #return {
-            #'ci': self.ci,
-            #'nombre_completo': self.nombre_completo,
-            #'correo': self.correo,
-            #'contrasena': self.contrasena,
-            #'tlf': self.correo,
-            #'direccion': self.direccion,
-            #'fecha_nacimiento': self.fecha_nacimiento,
-            #'sexo': self.sexo,
-            #'estado': self.estado,
-            #'dept_id': self.dept_id,
-            #'rol_id': self.rol_id,
-            #'ci_s': self.ci_s
-        #}
-
-class EmpleadoEsquema(marsh.Schema):
+class EmpleadoEsquema(marsh.SQLAlchemySchema):
     class Meta:
-        fields = ('ci', 
+        fields = (
+        'ci', 
+        'public_id',
         'nombre_completo', 
         'correo', 
         'contrasena', 
@@ -78,9 +64,7 @@ class EmpleadoEsquema(marsh.Schema):
         'rol_id',
         'ci_s')
 
-
-        
-
+# Departamentos
 class Departamento(db.Model):
     __tablename__ = 'departamento'
     id = db.Column(db.Integer, primary_key=True)
@@ -92,34 +76,11 @@ class Departamento(db.Model):
         self.id = id,
         self.nombre_dept = nombre_dept
     
-    #@property
-    #def serialize(self):
-        #return {
-            #'id': self.id,
-            #'nombre_dept': self.nombre_dept
-        #}
-
 class DepartamentoSchema(marsh.SQLAlchemySchema):
     class Meta:
         fields = ('id', 'nombre_dept')
-        #model = Departamento
-        #id = marsh.auto_field,
-        #nombre_dept = marsh.auto_field
 
-class Rol(db.Model):
-    __tablename__ = 'rol'
-    id = db.Column(db.Integer, primary_key=True)
-    nombre_rol = db.Column(db.String)
-    # Relación Empleados - Rol (m-1)
-    empleados = db.relationship('Empleado', backref='rol', lazy=True)
-   
-    @property
-    def serialize(self):
-        return {
-            'id': self.id,
-            'nombre_rol': self.nombre_rol
-        }
-
+# Historiales
 class Historial(db.Model):
     __tablename__= 'historial'
     id = db.Column(db.Integer, primary_key=True, unique=True)
@@ -127,12 +88,25 @@ class Historial(db.Model):
     ci_e = db.Column(db.Integer, db.ForeignKey('empleado.ci'), primary_key=True)
     modo_uso = db.Column(db.String)
     fecha = db.Column(db.DateTime)
-   
-    @property
-    def serialize(self):
-        return {
-            'id': self.id,
-            'ci_e': self.ci_e,
-            'modo_uso': self.modo_uso,
-            'fecha': self.fecha
-        }
+
+    def __init__(self, id, ci_e, modo_uso, fecha):
+        self.id = id,
+        self.ci_e = ci_e,
+        self.modo_uso = modo_uso,
+        self.fecha = fecha
+
+class HistorialSchema(marsh.SQLAlchemySchema):
+    class Meta:
+        fields = ('id', 'ci_e', 'modo_uso', 'fecha')
+
+ # Roles  
+class Rol(db.Model):
+    __tablename__ = 'rol'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre_rol = db.Column(db.String)
+    # Relación Empleados - Rol (m-1)
+    empleados = db.relationship('Empleado', backref='rol', lazy=True)
+
+class RolSchema(marsh.SQLAlchemySchema):
+    class Meta:
+        fields = ('id', 'nombre_rol')

@@ -1,12 +1,13 @@
-from models.models import Historial 
-from models.models import db 
+from models.models import Historial, HistorialSchema, db
 
-def create(historial):
-    h = Historial(
-        historial['id'], # Puede que no sea necesario porque se autoincrementa
-        historial['ci_e'],
-        historial['modo_uso'],
-        historial['fecha']
+def create_record(h):
+    historial_esquema = HistorialSchema()
+    historial = Historial(
+        h['id'], # Puede que no sea necesario porque se autoincrementa
+        h['ci_e'],
+        h['modo_uso'],
+        h['fecha']
     )
-    db.session.add(h)
+    db.session.add(historial)
     db.session.commit()
+    historial_esquema.dump(historial)

@@ -1,9 +1,9 @@
 from flask import Blueprint, request
-from controllers.empleado_controller import create
+from controllers.empleado_controller import create_employee
 
 empleado_bp = Blueprint('empleado_bp', __name__)
 
 @empleado_bp.route('/create', methods=['POST'])
-def createE():
+def crear_empleado():
     data = request.get_json()
-    create(data.get("empleado"))
+    create_employee(data.get("empleado"))

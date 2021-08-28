@@ -5,5 +5,3 @@ def get_all_deps():
     departamento_schema = DepartamentoSchema(many=True)
     departamentos = db.session.query(Departamento).all()
     return jsonify(departamento_schema.dump(departamentos))
-    #esquemas = DepartamentoSchema.dump(departamentos)
-    #return jsonify(esquemas)
