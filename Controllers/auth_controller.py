@@ -1,12 +1,12 @@
 from flask import jsonify, make_response, request, current_app
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, timedelta
-from models.models import Empleado, db
+from models.models import Empleado, Departamento, db
 import jwt
 import uuid
 
 
-def get_all_users():
+def get_all_users(current_user):
     # querying the database
     # for all the entries in it
     users = db.session.query(Empleado).all()
@@ -26,7 +26,8 @@ def get_all_users():
 
 def login():
     # creates dictionary of form data
-    auth = request.form
+    auth = request.get_json()
+    print(auth)
     if not auth or not auth.get('correo') or not auth.get('contrasena'):
         # returns 401 if any email or / and password is missing
         return make_response(
@@ -46,14 +47,36 @@ def login():
         )
   
     if check_password_hash(user.contrasena, auth.get('contrasena')):
-        # generates the JWT Token
+        # Generates the JWT Token
         token = jwt.encode({
             'public_id': user.public_id,
             'exp' : datetime.utcnow() + timedelta(minutes = 30)
         }, current_app.config['SECRET_KEY'])
-  
-        return make_response(jsonify({'token' : token}), 201)
-    # returns 403 if password is wrong
+        # Other necessary attributes
+        ci = user.ci
+        nombre_completo = user.nombre_completo
+        correo = user.correo
+        tlf = user.tlf
+        direccion = user.direccion
+        departamento = db.session.query(Departamento).get(user.dept_id).nombre_dept
+        rol_id = user.rol_id
+        supervisor = db.session.query(Empleado).get(user.ci_s).nombre_completo
+
+        # Response to the request
+        resp = make_response(jsonify({
+            'token': token, 
+            'ci': ci, 
+            'nombre_completo': nombre_completo, 
+            'correo': correo, 
+            'tlf': tlf, 
+            'direccion': direccion, 
+            'departamento': departamento, 
+            'rol': rol_id,
+            'supervisor': supervisor}), 201)
+        resp.headers['Access-Controll-Allow-Origin']= '*'
+        resp.headers['Content-Type']
+        return resp
+    # Returns 403 if password is wrong
     return make_response(
         'Could not verify',
         403,

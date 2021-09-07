@@ -12,17 +12,20 @@ from routes.auth_routes import auth_bp
 
 app = Flask(__name__)
 api = Api(app)
-cors = CORS(
-    app,
-    resources={r"*": {"origins": "*"}},
-    expose_headers=["Content-Type", "X-CSRFToken"],
-    supports_credentials=True,
-)
+cors = CORS()
+#cors = CORS(
+#    app,
+#    resources={r"*": {"origins": "http://localhost:4200/"}},
+#    allow_headers=["x-access-token", "Authorization"],
+#    expose_headers=["Authorization", "x-access-token", "Content-Type"],
+#    methods=["GET", "POST", "PUT", 'DELETE'],
+#    supports_credentials=True,)
 
 
 app.config.from_object('config')
 
 db.init_app(app)
+cors.init_app(app)
 marsh.init_app(app)
 migrate = Migrate(app, db)
 
